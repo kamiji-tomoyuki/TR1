@@ -12,58 +12,35 @@ using namespace std;
 
 // 読み取らせるマップチップのサイズ
 const int GRID_SIZE = 16;
-const int MATRIX_SIZE = 25; // 行列のサイズ
 
 Mat extractFeatureDescriptors(const Mat& img, Ptr<SIFT> sift);
+
 Mat LoadMapChips(const Mat& mapImage);
 
 int main() {
-    try {
-        // 読み取らせるマップチップ画像
-        Mat mapImage = imread("image/map.png");
-        if (mapImage.empty()) {
-            cerr << "Error: Could not load image." << endl;
-            return -1;
+    // 読み取らせるマップチップ画像
+    Mat mapImage = imread("image/map.png");
+    if (mapImage.empty()) {
+        cerr << "Error: Could not load image." << endl;
+        return -1;
+    }
+
+    // マップチップを解析 & 行列を抽出
+    Mat outputMatrix = LoadMapChips(mapImage);
+
+    // 行列を表示
+    cout << "Output Matrix:" << endl;
+    for (int i = 0; i < outputMatrix.rows; i++) {
+        for (int j = 0; j < outputMatrix.cols; j++) {
+            cout << outputMatrix.at<int>(i, j) << " ";
         }
-
-        // 画像のプロパティを表示
-        cout << "Image properties:" << endl;
-        cout << "Width: " << mapImage.cols << endl;
-        cout << "Height: " << mapImage.rows << endl;
-        cout << "Channels: " << mapImage.channels() << endl;
-
-        if (mapImage.cols < GRID_SIZE * MATRIX_SIZE || mapImage.rows < GRID_SIZE * MATRIX_SIZE) {
-            cerr << "Error: Image size is too small for the desired grid size." << endl;
-            return -1;
-        }
-
-        // マップチップを解析 & 行列を抽出
-        Mat outputMatrix = LoadMapChips(mapImage);
-
-        // 行列を表示
-        cout << "Output Matrix:" << endl;
-        for (int i = 0; i < outputMatrix.rows; i++) {
-            for (int j = 0; j < outputMatrix.cols; j++) {
-                cout << outputMatrix.at<int>(i, j) << " ";
-            }
-            cout << endl;
-        }
-
-        // 元の画像を描画
-        imshow("Image", mapImage);
-
-        waitKey(0); // 画像を描画させるために必要
-    }
-    catch (const cv::Exception& e) {
-        cerr << "OpenCV Exception: " << e.what() << endl;
-    }
-    catch (const exception& e) {
-        cerr << "Standard Exception: " << e.what() << endl;
-    }
-    catch (...) {
-        cerr << "Unknown Exception occurred." << endl;
+        cout << endl;
     }
 
+    // 元の画像を描画
+    imshow("Image", mapImage);
+
+    waitKey(0); // 画像を描画させるために必要
     return 0;
 }
 
@@ -81,8 +58,8 @@ Mat LoadMapChips(const Mat& mapImage) {
     Ptr<SIFT> sift = SIFT::create();
 
     // 画像のサイズ
-    int rows = MATRIX_SIZE; // 行列の行数
-    int cols = MATRIX_SIZE; // 行列の列数
+    int rows = mapImage.rows / GRID_SIZE;
+    int cols = mapImage.cols / GRID_SIZE;
 
     // 特徴ベクトルの格納場所
     Mat allDescriptors;
@@ -102,10 +79,10 @@ Mat LoadMapChips(const Mat& mapImage) {
     }
 
     // K-meansクラスタリング
-    int K = 10;  // クラスタ数
+    int K = 20;  // クラスタ数
     Mat labels;
     Mat centers;
-    kmeans(allDescriptors, K, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 0.1), 3, KMEANS_PP_CENTERS, centers);
+    kmeans(allDescriptors, K, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 200, 0.1), 10, KMEANS_PP_CENTERS, centers);
 
     // 行列として出力
     Mat outputMatrix = Mat::zeros(rows, cols, CV_32S);
