@@ -11,7 +11,7 @@ using namespace cv::ml;
 using namespace std;
 
 // 読み取らせるマップチップのサイズ
-const int GRID_SIZE = 17;
+const int GRID_SIZE = 16;
 
 Mat extractFeatureDescriptors(const Mat& img, Ptr<SIFT> sift);
 
