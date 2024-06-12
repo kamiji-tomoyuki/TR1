@@ -11,7 +11,7 @@ Mat CreateImages(const Mat& image);
 
 int main() {
 	// 画像を読み込む
-	Mat A = imread("image/kirby.jpg");     //カービィ
+	Mat A = imread("image/kirby.jpg");     //カービィ　
 	Mat B = imread("image/uvChecker.png"); //UV
 	Mat C = imread("image/map.png");       //マップチップ
 
