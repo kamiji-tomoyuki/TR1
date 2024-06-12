@@ -1,30 +1,30 @@
+//openCvをインクルード
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/ml.hpp>
-#include <iostream>
 #include <vector>
 
 using namespace cv;
 using namespace cv::ml;
 using namespace std;
 
-// グリッドサイズ（タイルサイズ）
-const int GRID_SIZE = 32;
+// 読み取らせるマップチップのサイズ
+const int GRID_SIZE = 17;
 
 Mat extractFeatureDescriptors(const Mat& img, Ptr<SIFT> sift);
 
-Mat processMapChips(const Mat& mapImage);
+Mat LoadMapChips(const Mat& mapImage);
 
 int main() {
-    // マップチップの画像を読み込み
+    // 読み取らせるマップチップ画像
     Mat mapImage = imread("image/map.png");
 
-    // マップチップの解析 & 行列の出力
-    Mat outputMatrix = processMapChips(mapImage);
+    // マップチップを解析 & 行列を抽出
+    Mat outputMatrix = LoadMapChips(mapImage);
 
-    // 行列の表示
+    // 行列を表示！！
     cout << "Output Matrix:" << endl;
     for (int i = 0; i < outputMatrix.rows; i++) {
         for (int j = 0; j < outputMatrix.cols; j++) {
@@ -33,9 +33,10 @@ int main() {
         cout << endl;
     }
 
+    // 元の画像を描画
     imshow("Image", mapImage);
 
-
+    waitKey(0);//画像を描画させるために必要
     return 0;
 }
 
@@ -48,7 +49,7 @@ Mat extractFeatureDescriptors(const Mat& img, Ptr<SIFT> sift) {
     return descriptors;
 }
 
-Mat processMapChips(const Mat& mapImage) {
+Mat LoadMapChips(const Mat& mapImage) {
     // SIFTオブジェクトの生成
     Ptr<SIFT> sift = SIFT::create();
 
