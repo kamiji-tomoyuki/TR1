@@ -11,7 +11,7 @@ using namespace cv::ml;
 using namespace std;
 
 // 読み取らせるマップチップのサイズ
-const int GRID_SIZE = 16;
+const int GRID_SIZE = 25;
 
 Mat extractFeatureDescriptors(const Mat& img, Ptr<SIFT> sift);
 
@@ -79,7 +79,7 @@ Mat LoadMapChips(const Mat& mapImage) {
     }
 
     // K-meansクラスタリング
-    int K = 20;  // クラスタ数
+    int K = 2;  // クラスタ数
     Mat labels;
     Mat centers;
     kmeans(allDescriptors, K, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 200, 0.1), 10, KMEANS_PP_CENTERS, centers);
