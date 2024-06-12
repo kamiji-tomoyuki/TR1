@@ -33,6 +33,9 @@ int main() {
         cout << endl;
     }
 
+    imshow("Image", mapImage);
+
+
     return 0;
 }
 
