@@ -13,6 +13,29 @@ using namespace std;
 // グリッドサイズ（タイルサイズ）
 const int GRID_SIZE = 32;
 
+Mat extractFeatureDescriptors(const Mat& img, Ptr<SIFT> sift);
+
+Mat processMapChips(const Mat& mapImage);
+
+int main() {
+    // マップチップの画像を読み込み
+    Mat mapImage = imread("image/map.png");
+
+    // マップチップの解析 & 行列の出力
+    Mat outputMatrix = processMapChips(mapImage);
+
+    // 行列の表示
+    cout << "Output Matrix:" << endl;
+    for (int i = 0; i < outputMatrix.rows; i++) {
+        for (int j = 0; j < outputMatrix.cols; j++) {
+            cout << outputMatrix.at<int>(i, j) << " ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
+
 Mat extractFeatureDescriptors(const Mat& img, Ptr<SIFT> sift) {
     Mat grayImage;
     cvtColor(img, grayImage, COLOR_BGR2GRAY);
@@ -63,27 +86,4 @@ Mat processMapChips(const Mat& mapImage) {
     }
 
     return outputMatrix;
-}
-
-int main() {
-    // マップチップの画像を読み込み
-    Mat mapImage = imread("image/map.png");
-    if (mapImage.empty()) {
-        cout << "Could not open or find the image!\n" << endl;
-        return -1;
-    }
-
-    // マップチップの解析と行列として出力
-    Mat outputMatrix = processMapChips(mapImage);
-
-    // 行列の表示
-    cout << "Output Matrix:" << endl;
-    for (int i = 0; i < outputMatrix.rows; i++) {
-        for (int j = 0; j < outputMatrix.cols; j++) {
-            cout << outputMatrix.at<int>(i, j) << " ";
-        }
-        cout << endl;
-    }
-
-    return 0;
 }
