@@ -78,11 +78,10 @@ Mat LoadMapChips(const Mat& mapImage) {
         }
     }
 
-    // K-meansクラスタリング
-    int K = 2;  // クラスタ数
+    int K = 2;  // 0 or 1
     Mat labels;
     Mat centers;
-    kmeans(allDescriptors, K, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 200, 0.1), 10, KMEANS_PP_CENTERS, centers);
+    kmeans(allDescriptors, K, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 0.1), 10, KMEANS_PP_CENTERS, centers);
 
     // 行列として出力
     Mat outputMatrix = Mat::zeros(rows, cols, CV_32S);
