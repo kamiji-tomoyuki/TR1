@@ -1,10 +1,10 @@
-//openCvをインクルード
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/ml.hpp>
 #include <vector>
+#include <iostream>
 
 using namespace cv;
 using namespace cv::ml;
@@ -19,12 +19,16 @@ Mat LoadMapChips(const Mat& mapImage);
 
 int main() {
     // 読み取らせるマップチップ画像
-    Mat mapImage = imread("image/map.png");
+    Mat mapImage = imread("image/uvChecker.png");
+    if (mapImage.empty()) {
+        cerr << "Error: Could not load image." << endl;
+        return -1;
+    }
 
     // マップチップを解析 & 行列を抽出
     Mat outputMatrix = LoadMapChips(mapImage);
 
-    // 行列を表示！！
+    // 行列を表示
     cout << "Output Matrix:" << endl;
     for (int i = 0; i < outputMatrix.rows; i++) {
         for (int j = 0; j < outputMatrix.cols; j++) {
@@ -36,7 +40,7 @@ int main() {
     // 元の画像を描画
     imshow("Image", mapImage);
 
-    waitKey(0);//画像を描画させるために必要
+    waitKey(0); // 画像を描画させるために必要
     return 0;
 }
 
