@@ -1,10 +1,8 @@
 #include <opencv2/opencv.hpp>
-#include <opencv2/features2d.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/core.hpp>
-#include <opencv2/ml.hpp>
-#include <vector>
+#include <opencv2/xfeatures2d.hpp>
 #include <iostream>
+#include <vector>
+#include <fstream>
 
 using namespace cv;
 using namespace cv::ml;
