@@ -11,7 +11,7 @@ using namespace cv::ml;
 using namespace std;
 
 // 読み取らせるマップチップのサイズ
-const int GRID_SIZE = 25;
+const int GRID_SIZE = 24;
 
 Mat extractFeatureDescriptors(const Mat& img, Ptr<SIFT> sift);
 
@@ -19,7 +19,7 @@ Mat LoadMapChips(const Mat& mapImage);
 
 int main() {
     // 読み取らせるマップチップ画像
-    Mat mapImage = imread("image/map.png");
+    Mat mapImage = imread("image/mapChip.png");
     if (mapImage.empty()) {
         cerr << "Error: Could not load image." << endl;
         return -1;
