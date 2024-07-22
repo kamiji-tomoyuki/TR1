@@ -39,7 +39,7 @@ Mat CreateImages(const vector<Mat>& images) {
     // 各画像の色を定義
     vector<Scalar> colors = { Scalar(255, 0, 0), Scalar(0, 255, 0), Scalar(0, 0, 255), Scalar(255, 255, 0) };
 
-    // 新しい画像用の空のキャンバスを作成
+    // 新しい画像用の空のキャンバスを作成　
     Mat newImage = Mat::zeros(images[0].size(), images[0].type());
 
     // 各画像について特徴を抽出
