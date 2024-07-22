@@ -1,94 +1,77 @@
 #include <opencv2/opencv.hpp>
-#include <opencv2/xfeatures2d.hpp>
-#include <iostream>
-#include <vector>
-#include <fstream>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d/features2d.hpp>
 
 using namespace cv;
-using namespace cv::ml;
 using namespace std;
 
-// 読み取らせるマップチップのサイズ
-const int GRID_SIZE = 24;
-
-Mat extractFeatureDescriptors(const Mat& img, Ptr<SIFT> sift);
-
-Mat LoadMapChips(const Mat& mapImage);
+// 複数の画像から特徴を元に新しい画像を生成する関数
+Mat CreateImages(const vector<Mat>& images);
 
 int main() {
-    // 読み取らせるマップチップ画像
-    Mat mapImage = imread("image/mapChip.png");
-    if (mapImage.empty()) {
-        cerr << "Error: Could not load image." << endl;
-        return -1;
-    }
+    // 複数の画像をベクターに読み込む
+    vector<Mat> images;
+    images.push_back(imread("image/kirby.jpg"));     // カービィ
+    images.push_back(imread("image/uvChecker.png")); // UV
+    images.push_back(imread("image/map.png"));       // マップチップ
 
-    // マップチップを解析 & 行列を抽出
-    Mat outputMatrix = LoadMapChips(mapImage);
-
-    // 行列を表示
-    cout << "Output Matrix:" << endl;
-    for (int i = 0; i < outputMatrix.rows; i++) {
-        for (int j = 0; j < outputMatrix.cols; j++) {
-            cout << outputMatrix.at<int>(i, j) << " ";
+    // すべての画像が正しく読み込まれていることを確認
+    for (size_t i = 0; i < images.size(); ++i) {
+        if (images[i].empty()) {
+            cout << "画像 " << i << " を開くことができませんでした。" << endl;
+            return -1;
         }
-        cout << endl;
     }
 
-    // 元の画像を描画
-    imshow("Image", mapImage);
+    // 複数の画像から特徴を元に新しい画像を生成
+    Mat newImage = CreateImages(images);
 
-    waitKey(0); // 画像を描画させるために必要
+    // 元の画像と生成した画像を表示
+    for (size_t i = 0; i < images.size(); ++i) {
+        string imageName = "Image " + to_string(i + 1);
+        imshow(imageName, images[i]);
+    }
+    imshow("New Image", newImage);
+
+    waitKey(0); // ウィンドウ内でキー入力を待機
     return 0;
 }
 
-Mat extractFeatureDescriptors(const Mat& img, Ptr<SIFT> sift) {
-    Mat grayImage;
-    cvtColor(img, grayImage, COLOR_BGR2GRAY);
-    vector<KeyPoint> keypoints;
-    Mat descriptors;
-    sift->detectAndCompute(grayImage, noArray(), keypoints, descriptors);
-    return descriptors;
-}
-
-Mat LoadMapChips(const Mat& mapImage) {
-    // SIFTオブジェクトの生成
+Mat CreateImages(const vector<Mat>& images) {
     Ptr<SIFT> sift = SIFT::create();
+    vector<KeyPoint> allKeypoints;
+    Mat descriptors;
 
-    // 画像のサイズ
-    int rows = mapImage.rows / GRID_SIZE;
-    int cols = mapImage.cols / GRID_SIZE;
+    // 各画像について特徴を抽出
+    for (const Mat& image : images) {
+        Mat grayImage;
+        cvtColor(image, grayImage, COLOR_BGR2GRAY);
 
-    // 特徴ベクトルの格納場所
-    Mat allDescriptors;
-    vector<int> indices;
+        vector<KeyPoint> keypoints;
+        Mat imageDescriptors;
+        sift->detectAndCompute(grayImage, noArray(), keypoints, imageDescriptors);
 
-    // 各タイルの特徴ベクトルを抽出
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            Rect roi(j * GRID_SIZE, i * GRID_SIZE, GRID_SIZE, GRID_SIZE);
-            Mat tile = mapImage(roi);
-            Mat descriptors = extractFeatureDescriptors(tile, sift);
-            if (!descriptors.empty()) {
-                allDescriptors.push_back(descriptors);
-                indices.push_back(i * cols + j);
-            }
+        // この画像からのキーポイントと記述子を追加
+        allKeypoints.insert(allKeypoints.end(), keypoints.begin(), keypoints.end());
+
+        if (descriptors.empty()) {
+            descriptors = imageDescriptors.clone();
+        }
+        else {
+            vconcat(descriptors, imageDescriptors, descriptors);
         }
     }
 
-    int K = 2;  // 0 or 1
-    Mat labels;
-    Mat centers;
-    kmeans(allDescriptors, K, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 0.1), 10, KMEANS_PP_CENTERS, centers);
+    // 新しい画像用の空のキャンバスを作成
+    Mat newImage = Mat::zeros(images[0].size(), images[0].type());
 
-    // 行列として出力
-    Mat outputMatrix = Mat::zeros(rows, cols, CV_32S);
-    for (size_t i = 0; i < indices.size(); i++) {
-        int idx = indices[i];
-        int r = idx / cols;
-        int c = idx % cols;
-        outputMatrix.at<int>(r, c) = labels.at<int>(i);
+    // ランダムに新しい画像にキーポイントを描画
+    for (const KeyPoint& kp : allKeypoints) {
+        Point center(cvRound(kp.pt.x), cvRound(kp.pt.y));
+        int radius = cvRound(kp.size / 2);
+        circle(newImage, center, radius, Scalar::all(255), 1, LINE_AA);
     }
 
-    return outputMatrix;
+    return newImage;
 }
