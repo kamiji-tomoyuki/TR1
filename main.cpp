@@ -12,17 +12,10 @@ Mat CreateImages(const vector<Mat>& images);
 int main() {
     // 複数の画像をベクターに読み込む
     vector<Mat> images;
-    images.push_back(imread("image/kirby.jpg"));     // カービィ
-    images.push_back(imread("image/uvChecker.png")); // UV
-    images.push_back(imread("image/map.png"));       // マップチップ
-
-    // すべての画像が正しく読み込まれていることを確認
-    for (size_t i = 0; i < images.size(); ++i) {
-        if (images[i].empty()) {
-            cout << "画像 " << i << " を開くことができませんでした。" << endl;
-            return -1;
-        }
-    }
+    images.push_back(imread("image/map1.png"));      
+    images.push_back(imread("image/map2.png"));      
+    images.push_back(imread("image/map3.png"));      
+    images.push_back(imread("image/map4.png"));      
 
     // 複数の画像から特徴を元に新しい画像を生成
     Mat newImage = CreateImages(images);
@@ -43,14 +36,28 @@ Mat CreateImages(const vector<Mat>& images) {
     vector<KeyPoint> allKeypoints;
     Mat descriptors;
 
+    // 各画像の色を定義
+    vector<Scalar> colors = { Scalar(255, 0, 0), Scalar(0, 255, 0), Scalar(0, 0, 255), Scalar(255, 255, 0) };
+
+    // 新しい画像用の空のキャンバスを作成
+    Mat newImage = Mat::zeros(images[0].size(), images[0].type());
+
     // 各画像について特徴を抽出
-    for (const Mat& image : images) {
+    for (size_t i = 0; i < images.size(); ++i) {
         Mat grayImage;
-        cvtColor(image, grayImage, COLOR_BGR2GRAY);
+        cvtColor(images[i], grayImage, COLOR_BGR2GRAY);
 
         vector<KeyPoint> keypoints;
         Mat imageDescriptors;
         sift->detectAndCompute(grayImage, noArray(), keypoints, imageDescriptors);
+
+        // この画像からのキーポイントを描画
+        for (const KeyPoint& kp : keypoints) {
+            Point center(cvRound(kp.pt.x), cvRound(kp.pt.y));
+            int radius = cvRound(kp.size / 2);
+            // 画像に対応する色を使用して特徴点を描画
+            circle(newImage, center, radius, colors[i % colors.size()], 1, LINE_AA);
+        }
 
         // この画像からのキーポイントと記述子を追加
         allKeypoints.insert(allKeypoints.end(), keypoints.begin(), keypoints.end());
@@ -61,16 +68,6 @@ Mat CreateImages(const vector<Mat>& images) {
         else {
             vconcat(descriptors, imageDescriptors, descriptors);
         }
-    }
-
-    // 新しい画像用の空のキャンバスを作成
-    Mat newImage = Mat::zeros(images[0].size(), images[0].type());
-
-    // ランダムに新しい画像にキーポイントを描画
-    for (const KeyPoint& kp : allKeypoints) {
-        Point center(cvRound(kp.pt.x), cvRound(kp.pt.y));
-        int radius = cvRound(kp.size / 2);
-        circle(newImage, center, radius, Scalar::all(255), 1, LINE_AA);
     }
 
     return newImage;
