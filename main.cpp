@@ -12,10 +12,10 @@ Mat CreateImages(const vector<Mat>& images);
 int main() {
     // 複数の画像をベクターに読み込む
     vector<Mat> images;
-    images.push_back(imread("image/map1.png"));      
-    images.push_back(imread("image/map2.png"));      
-    images.push_back(imread("image/map3.png"));      
-    images.push_back(imread("image/map4.png"));      
+    images.push_back(imread("image/map1.png"));//赤      
+    images.push_back(imread("image/map2.png"));//青      
+    images.push_back(imread("image/map3.png"));//緑     
+    images.push_back(imread("image/map4.png"));//シアン     
 
     // 複数の画像から特徴を元に新しい画像を生成
     Mat newImage = CreateImages(images);
